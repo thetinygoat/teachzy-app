@@ -15,6 +15,7 @@ import { KeyboardAvoidingView } from "react-native";
 import { Portal, Dialog, TextInput } from "react-native-paper";
 import { primaryColor, white } from "../constants/colors";
 import axios from "../axios";
+import moment from "moment";
 
 let events = [
 	{
@@ -60,58 +61,13 @@ export default function Planner() {
 			<View style={styles.newEventsHeader}>
 				<Text> Upcoming Scheduled Events</Text>
 			</View>
-
-			<KeyboardAvoidingView>
-				<Portal>
-					<Dialog
-						visible={newEventModalOpen}
-						onDismiss={() => {
-							setNewEventModalOpen(false);
-						}}
-					>
-						<Dialog.Title>Add New Event</Dialog.Title>
-						<Dialog.Content>
-							<ScrollView>
-								<TextInput
-									label={"Date"}
-									disabled={true}
-									style={{ backgroundColor: white }}
-									editable={false}
-									mode={"outlined"}
-									value={selectedDate}
-								/>
-								<TextInput
-									label={"Name"}
-									style={{ backgroundColor: white }}
-									mode={"outlined"}
-								/>
-								<TextInput
-									label={"Description(optional)"}
-									style={{ backgroundColor: white }}
-									mode={"outlined"}
-									underlineColor={primaryColor}
-								/>
-							</ScrollView>
-						</Dialog.Content>
-						<Dialog.Actions>
-							<Button
-								onPress={() => {
-									setNewEventModalOpen(false);
-								}}
-							>
-								Cancel
-							</Button>
-							<Button
-								onPress={() => {
-									setNewEventModalOpen(false);
-								}}
-							>
-								Done
-							</Button>
-						</Dialog.Actions>
-					</Dialog>
-				</Portal>
-			</KeyboardAvoidingView>
+			{newEventModalOpen && (
+				<AddNewEventModal
+					visible={newEventModalOpen}
+					closeModal={() => setNewEventModalOpen(false)}
+					selectedDate={selectedDate}
+				/>
+			)}
 
 			{/*<FlatList*/}
 			{/*	data={events}*/}
@@ -125,6 +81,78 @@ export default function Planner() {
 		</View>
 	);
 }
+
+const AddNewEventModal = props => {
+	let [name, setName] = useState("");
+	let [description, setDescription] = useState("");
+
+	const submitForm = async () => {
+		console.log("HI in the sunmit");
+		let response = await axios.post(
+			"/messages/new",
+			{
+				title: name,
+				parent_group: "k1nxo6di",
+				description: description,
+				message_type: "event",
+				timestamp: 1552142694,
+				expiry_date: moment(props.selectedDate, "YYYY-MM-DD")
+					.endOf("day")
+					.toString()
+			},
+			{
+				headers: {
+					"x-auth-token":
+						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZDEzYmZlYjA4MzgzYzAwMTcxZTI1YWEiLCJpYXQiOjE1NzA3MzM5Njl9.CQk9L9iIfbgDzjP_tQ61OtJGUpkQjc5P539z4kAzCkk"
+				}
+			}
+		);
+		console.log(response);
+	};
+	return (
+		<KeyboardAvoidingView>
+			<Portal>
+				<Dialog visible={props.visible} onDismiss={props.closeModal}>
+					<Dialog.Title>Add New Events</Dialog.Title>
+					<Dialog.Content>
+						<ScrollView>
+							<TextInput
+								label={"Date"}
+								disabled={true}
+								style={{ backgroundColor: white }}
+								editable={false}
+								mode={"outlined"}
+								value={moment(props.selectedDate, "YYYY-MM-DD")
+									.endOf("day")
+									.format("LL")
+									.toString()}
+							/>
+							<TextInput
+								label={"Name"}
+								value={name}
+								style={{ backgroundColor: white }}
+								onChangeText={text => setName(text)}
+								mode={"outlined"}
+							/>
+							<TextInput
+								label={"Description(optional)"}
+								value={description}
+								style={{ backgroundColor: white }}
+								onChangeText={text => setDescription(text)}
+								mode={"outlined"}
+								underlineColor={primaryColor}
+							/>
+						</ScrollView>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={props.closeModal}>Cancel</Button>
+						<Button onPress={submitForm}>Done</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
+		</KeyboardAvoidingView>
+	);
+};
 
 const styles = StyleSheet.create({
 	container: {
