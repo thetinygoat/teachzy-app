@@ -1,9 +1,20 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, FlatList, Modal, Button } from "react-native";
+import {
+	StyleSheet,
+	Text,
+	View,
+	FlatList,
+	Modal,
+	ScrollView
+} from "react-native";
 import { Calendar, CalendarList, Agenda } from "react-native-calendars";
 import { LocaleConfig } from "react-native-calendars";
 import { Dimensions } from "react-native";
-// import {Button} from "react-native-paper";
+import { Button } from "react-native-paper";
+import { KeyboardAvoidingView } from "react-native";
+import { Portal, Dialog, TextInput } from "react-native-paper";
+import { primaryColor, white } from "../constants/colors";
+import axios from "../axios";
 
 let events = [
 	{
@@ -29,24 +40,20 @@ events.forEach(event => {
 });
 
 export default function Planner() {
-	const [modalOpen, setModalStatus] = useState(false);
-	const [eventDetails, setEventDetails] = useState({});
+	const [newEventModalOpen, setNewEventModalOpen] = useState(false);
+	const [selectedDate, setSelectedDate] = useState("");
 
 	const dayPressed = day => {
-		events.forEach(function(event) {
-			console.log("event is", event);
-			if (event.date === day.dateString) {
-				setModalStatus(true);
-				setEventDetails(event);
-			}
-		});
+		console.log(day);
+		setSelectedDate(day.dateString);
+		setNewEventModalOpen(true);
 	};
 	return (
 		<View style={styles.container}>
 			{/*<Text>Planner Screen</Text>*/}
 			<Calendar
 				markedDates={markedDates}
-				onDayPress={day => {
+				onDayLongPress={day => {
 					dayPressed(day);
 				}}
 			/>
@@ -54,11 +61,58 @@ export default function Planner() {
 				<Text> Upcoming Scheduled Events</Text>
 			</View>
 
-			<AddNewEventModal
-				visible={modalOpen}
-				eventDetails={eventDetails}
-				closeModal={() => setModalStatus(false)}
-			/>
+			<KeyboardAvoidingView>
+				<Portal>
+					<Dialog
+						visible={newEventModalOpen}
+						onDismiss={() => {
+							setNewEventModalOpen(false);
+						}}
+					>
+						<Dialog.Title>Add New Event</Dialog.Title>
+						<Dialog.Content>
+							<ScrollView>
+								<TextInput
+									label={"Date"}
+									disabled={true}
+									style={{ backgroundColor: white }}
+									editable={false}
+									mode={"outlined"}
+									value={selectedDate}
+								/>
+								<TextInput
+									label={"Name"}
+									style={{ backgroundColor: white }}
+									mode={"outlined"}
+								/>
+								<TextInput
+									label={"Description(optional)"}
+									style={{ backgroundColor: white }}
+									mode={"outlined"}
+									underlineColor={primaryColor}
+								/>
+							</ScrollView>
+						</Dialog.Content>
+						<Dialog.Actions>
+							<Button
+								onPress={() => {
+									setNewEventModalOpen(false);
+								}}
+							>
+								Cancel
+							</Button>
+							<Button
+								onPress={() => {
+									setNewEventModalOpen(false);
+								}}
+							>
+								Done
+							</Button>
+						</Dialog.Actions>
+					</Dialog>
+				</Portal>
+			</KeyboardAvoidingView>
+
 			{/*<FlatList*/}
 			{/*	data={events}*/}
 			{/*	renderItem={event => (*/}
@@ -71,16 +125,6 @@ export default function Planner() {
 		</View>
 	);
 }
-
-const AddNewEventModal = props => {
-	return (
-		<Modal visible={props.visible} animationType="slide">
-			<View>
-				<Button title="Close Modal " onPress={props.closeModal} />
-			</View>
-		</Modal>
-	);
-};
 
 const styles = StyleSheet.create({
 	container: {
