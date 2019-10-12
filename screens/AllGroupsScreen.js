@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Card, Title } from "react-native-paper";
 import {
 	StyleSheet,
-	Text,
 	View,
-	Button,
-	TouchableNativeFeedback
+	ScrollView,
+	KeyboardAvoidingView,
+	RefreshControl
 } from "react-native";
 import axios from "../axios";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from "../components/HeaderButton";
+import { Fab, GroupCard } from "../components";
+import { Portal, Dialog, TextInput, Button } from "react-native-paper";
+import { primaryColor, white } from "../constants/colors";
+
 export default function AllGroups({ navigation }) {
 	const [groups, setGroups] = useState([]);
 	useEffect(() => {
@@ -24,26 +27,83 @@ export default function AllGroups({ navigation }) {
 		};
 		fetchGroups();
 	}, []);
+
+	const [dialogVisibility, setDialogVisibility] = useState(false);
+	const [refreshing, setRefreshing] = React.useState(false);
+
+	const onRefresh = React.useCallback(() => {
+		setRefreshing(true);
+
+		setTimeout(() => setRefreshing(false), 2000);
+	}, [refreshing]);
 	return (
 		<View style={styles.container}>
-			{groups.map(group => {
-				return (
-					<TouchableNativeFeedback
-						key={group.unique_id}
-						onPress={() => {
-							navigation.navigate({ routeName: "Group" });
+			<ScrollView
+				style={styles.container}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
+			>
+				{groups.map(group => {
+					return (
+						<GroupCard
+							group={group}
+							key={group.unique_id}
+							navigation={navigation}
+						/>
+					);
+				})}
+			</ScrollView>
+			<Fab onPress={() => setDialogVisibility(true)} delayPressIn={0} />
+
+			<KeyboardAvoidingView>
+				<Portal>
+					<Dialog
+						visible={dialogVisibility}
+						onDismiss={() => {
+							setDialogVisibility(false);
 						}}
 					>
-						<Card style={styles.group}>
-							<Text style={styles.studentCount}>{group.subject}</Text>
-							<Title>{group.name}</Title>
-							<Text style={styles.studentCount}>
-								{group.approved_users.length} Students
-							</Text>
-						</Card>
-					</TouchableNativeFeedback>
-				);
-			})}
+						<Dialog.Title>Add New Group</Dialog.Title>
+						<Dialog.Content>
+							<ScrollView>
+								<TextInput
+									label={"Name"}
+									style={{ backgroundColor: white }}
+									mode={"outlined"}
+								/>
+								<TextInput
+									label={"Description"}
+									style={{ backgroundColor: white }}
+									mode={"outlined"}
+								/>
+								<TextInput
+									label={"Maths"}
+									style={{ backgroundColor: white }}
+									mode={"outlined"}
+									underlineColor={primaryColor}
+								/>
+							</ScrollView>
+						</Dialog.Content>
+						<Dialog.Actions>
+							<Button
+								onPress={() => {
+									setDialogVisibility(false);
+								}}
+							>
+								Cancel
+							</Button>
+							<Button
+								onPress={() => {
+									setDialogVisibility(false);
+								}}
+							>
+								Done
+							</Button>
+						</Dialog.Actions>
+					</Dialog>
+				</Portal>
+			</KeyboardAvoidingView>
 		</View>
 	);
 }
@@ -71,25 +131,5 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: "#fff"
-	},
-	group: {
-		paddingLeft: 10,
-		paddingRight: 10,
-		paddingBottom: 25,
-		paddingTop: 25,
-		margin: 10,
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-
-		elevation: 5,
-		borderRadius: 10
-	},
-	studentCount: {
-		color: "#11d3c1"
 	}
 });
