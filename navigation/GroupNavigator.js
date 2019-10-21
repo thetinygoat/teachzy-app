@@ -7,12 +7,16 @@ import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from "../components/HeaderButton";
 import TabNavigator from "./TabNavigator";
 const GroupNavigator = createStackNavigator({
-	Groups: {
-		screen: AllGroups
-	},
-	Group: {
-		screen: TabNavigator
-	}
+  Groups: {
+    screen: AllGroups
+  },
+  Group: {
+    screen: TabNavigator,
+    navigationOptions: {
+      title: "Group",
+      headerTintColor: "#11d3c1"
+    }
+  }
 });
 
 export default createAppContainer(GroupNavigator);
