@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { format } from "date-fns";
 import { Switch } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { primaryColor, white } from "../constants/colors";
 const Attendance = () => {
   const [DatePicker, setDatePicker] = useState(false);
   const openDatePicker = async () => {
@@ -62,11 +64,30 @@ const Attendance = () => {
   };
   return (
     <View style={styles.container}>
-      <TouchableNativeFeedback onPress={() => openDatePicker()}>
-        <View style={styles.datePicker}>
-          <Text>{format(new Date(), "dd/MM/yyyy")}</Text>
-        </View>
-      </TouchableNativeFeedback>
+      <View style={styles.datePicker}>
+        <TouchableNativeFeedback>
+          <MaterialCommunityIcons
+            name={"chevron-left-circle"}
+            size={30}
+            color={primaryColor}
+          />
+        </TouchableNativeFeedback>
+        <TouchableNativeFeedback onPress={() => openDatePicker()}>
+          <View style={styles.dateButton}>
+            <Text style={{ color: white, fontWeight: "bold" }}>
+              {format(new Date(), "dd/MM/yyyy")}
+            </Text>
+          </View>
+        </TouchableNativeFeedback>
+        <TouchableNativeFeedback>
+          <MaterialCommunityIcons
+            name={"chevron-right-circle"}
+            size={30}
+            color={primaryColor}
+          />
+        </TouchableNativeFeedback>
+      </View>
+
       <ScrollView>
         {data.map((student, ix) => {
           return (
@@ -110,6 +131,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
+  },
+  dateButton: {
+    borderRadius: 20,
+    backgroundColor: primaryColor,
+    paddingBottom: 10,
+    paddingLeft: 30,
+    paddingTop: 10,
+    paddingRight: 30
   }
 });
 
