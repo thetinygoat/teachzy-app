@@ -4,9 +4,11 @@ import {
   Text,
   View,
   Button,
-  DatePickerAndroid
+  DatePickerAndroid,
+  TouchableNativeFeedback
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Switch } from "react-native-paper";
 const Attendance = () => {
   const [DatePicker, setDatePicker] = useState(false);
   const openDatePicker = async () => {
@@ -47,16 +49,33 @@ const Attendance = () => {
       present: true
     }
   ];
+
+  const handleAbsent = i => {
+    data.map((student, ix) => {
+      if (i === ix) {
+        student.present = false;
+      }
+    });
+  };
   return (
     <View style={styles.container}>
-      <Button
-        onPress={() => {
-          openDatePicker();
-        }}
-        title="Date"
-      />
-      {data.map(student => {
-        return <Text style={styles.student}>{student.name}</Text>;
+      <TouchableNativeFeedback onPress={() => openDatePicker()}>
+        <View style={styles.datePicker}>
+          <Text>{Date.now()}</Text>
+        </View>
+      </TouchableNativeFeedback>
+      {data.map((student, ix) => {
+        return (
+          <View style={styles.student}>
+            <Text>{student.name}</Text>
+            <Switch
+              value={student.present}
+              onValueChange={() => {
+                handleAbsent(ix);
+              }}
+            />
+          </View>
+        );
       })}
     </View>
   );
@@ -71,7 +90,21 @@ const styles = StyleSheet.create({
     fontSize: 17,
     padding: 20,
     borderBottomColor: "#e0e0e0",
-    borderBottomWidth: 1
+    borderBottomWidth: 1,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  datePicker: {
+    fontSize: 17,
+    padding: 20,
+    borderBottomColor: "#e0e0e0",
+    borderBottomWidth: 1,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   }
 });
 
