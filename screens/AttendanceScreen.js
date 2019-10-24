@@ -3,11 +3,11 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
+  ScrollView,
   DatePickerAndroid,
   TouchableNativeFeedback
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
 import { Switch } from "react-native-paper";
 const Attendance = () => {
   const [DatePicker, setDatePicker] = useState(false);
@@ -23,17 +23,18 @@ const Attendance = () => {
       console.warn("Cannot open date picker", message);
     }
   };
-  const data = [
+
+  const [data, setData] = useState([
     {
       name: "Sachin",
       present: true
     },
     {
-      name: "Sachin",
+      name: "Mayank",
       present: true
     },
     {
-      name: "Sachin",
+      name: "Divij",
       present: true
     },
     {
@@ -48,35 +49,39 @@ const Attendance = () => {
       name: "Sachin",
       present: true
     }
-  ];
+  ]);
 
   const handleAbsent = i => {
-    data.map((student, ix) => {
-      if (i === ix) {
-        student.present = false;
-      }
+    let updatedStudent = data[i];
+    updatedStudent.present = !updatedStudent.present;
+    let newData = data.filter((_, ix) => {
+      return ix !== i;
     });
+    newData.splice(i, 0, updatedStudent);
+    setData(newData);
   };
   return (
     <View style={styles.container}>
       <TouchableNativeFeedback onPress={() => openDatePicker()}>
         <View style={styles.datePicker}>
-          <Text>{Date.now()}</Text>
+          <Text>{format(new Date(), "dd/MM/yyyy")}</Text>
         </View>
       </TouchableNativeFeedback>
-      {data.map((student, ix) => {
-        return (
-          <View style={styles.student}>
-            <Text>{student.name}</Text>
-            <Switch
-              value={student.present}
-              onValueChange={() => {
-                handleAbsent(ix);
-              }}
-            />
-          </View>
-        );
-      })}
+      <ScrollView>
+        {data.map((student, ix) => {
+          return (
+            <View style={styles.student}>
+              <Text>{student.name}</Text>
+              <Switch
+                value={student.present}
+                onValueChange={() => {
+                  handleAbsent(ix);
+                }}
+              />
+            </View>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 };
